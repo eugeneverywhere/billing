@@ -37,6 +37,11 @@ func (h *handler) getAccountByExternalID(externalID string) (bool, error) {
 }
 
 func (h *handler) CreateAccount(operation *types.CreateAccount) (*types.OperationResult, error) {
+	h.accountMutex.Lock(operation.ExternalAccountID)
+	defer h.accountMutex.Unlock(operation.ExternalAccountID)
+
+	h.log.Debugf("Creating account: %v", operation)
+
 	if ContainsSpaces(operation.ExternalAccountID) {
 		return &types.OperationResult{
 			Result:  types.ErrSpaces,

@@ -3,3 +3,4 @@
 .idea
 /cmd/billing/billing
 /cmd/migrate/migrate
+/cmd/func/func

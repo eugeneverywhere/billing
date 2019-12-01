@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"strings"
 	"unicode"
 )
 
@@ -14,19 +13,9 @@ func ContainsSpaces(str string) bool {
 	return false
 }
 
-func XORStrings(str1, str2 string) string {
-	var short, long string
-	if len(str1) > len(str2) {
-		short = str2
-		long = str1
-	} else {
-		short = str1
-		long = str2
+func XORStrings(str1, str2 string) (result string) {
+	for i := range str1 {
+		result += string(str1[i] ^ str2[i%len(str2)])
 	}
-	result := make([]byte, len(long))
-	short += strings.Repeat(" ", len(long)-len(short))
-	for i := 0; i < len(long); i++ {
-		result[i] = long[i] ^ short[i]
-	}
-	return string(result)
+	return result
 }

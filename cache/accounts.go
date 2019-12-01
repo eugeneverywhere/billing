@@ -9,7 +9,6 @@ import (
 
 // AccountsCache - accounts cache interface
 type AccountsCache interface {
-	GetAccountsByID() map[int64]*models.Account
 	GetAccountsByExtID() map[string]*models.Account
 	Update()
 }
@@ -17,7 +16,6 @@ type AccountsCache interface {
 type accountsCache struct {
 	log          logger.Logger
 	db           db.DB
-	cacheByID    map[int64]*models.Account
 	cacheByExtID map[string]*models.Account
 	sync.Mutex
 }
@@ -26,17 +24,9 @@ type accountsCache struct {
 func NewAccountsCache(db db.DB) AccountsCache {
 	return &accountsCache{
 		db:           db,
-		cacheByID:    make(map[int64]*models.Account),
 		cacheByExtID: make(map[string]*models.Account),
 		log:          logger.NewLogger("accounts cache"),
 	}
-}
-
-func (c *accountsCache) GetAccountsByID() map[int64]*models.Account {
-	c.Lock()
-
-	defer c.Unlock()
-	return c.cacheByID
 }
 
 func (c *accountsCache) GetAccountsByExtID() map[string]*models.Account {
@@ -53,19 +43,16 @@ func (c *accountsCache) Update() {
 	if err != nil {
 		c.log.Errorf("update accounts cache failed: %v", err.Error())
 	}
-	mapByID, mapByExtID := makeMaps(accounts)
+	mapByExtID := makeMaps(accounts)
 	c.Lock()
-	c.cacheByID = mapByID
 	c.cacheByExtID = mapByExtID
 	c.Unlock()
 }
 
-func makeMaps(array []*models.Account) (byID map[int64]*models.Account, byExtID map[string]*models.Account) {
-	byID = make(map[int64]*models.Account)
+func makeMaps(array []*models.Account) (byExtID map[string]*models.Account) {
 	byExtID = make(map[string]*models.Account)
 	for _, v := range array {
-		byID[v.ID] = v
 		byExtID[v.ExternalID] = v
 	}
-	return byID, byExtID
+	return byExtID
 }

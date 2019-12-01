@@ -25,6 +25,8 @@ func (h *handler) TransferAmount(transfer *types.TransferAmount) (*types.Operati
 	}
 
 	//to avoid deadlocks
+	h.log.Debugf("xor %b", XORStrings(transfer.Source, transfer.Target))
+
 	h.accountMutex.Lock(XORStrings(transfer.Source, transfer.Target))
 	defer h.accountMutex.Unlock(XORStrings(transfer.Source, transfer.Target))
 	//then lock each account to avoid inconsistency
@@ -32,6 +34,8 @@ func (h *handler) TransferAmount(transfer *types.TransferAmount) (*types.Operati
 	defer h.accountMutex.Unlock(transfer.Source)
 	h.accountMutex.Lock(transfer.Target)
 	defer h.accountMutex.Unlock(transfer.Target)
+
+	h.log.Debugf("Transferring: %v", transfer)
 
 	if accountSrc.Balance < transfer.Amount {
 		return &types.OperationResult{

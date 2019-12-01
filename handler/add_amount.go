@@ -9,6 +9,8 @@ func (h *handler) AddAmount(addAmount *types.AddAmount) (*types.OperationResult,
 	h.accountMutex.Lock(addAmount.ExternalAccountID)
 	defer h.accountMutex.Unlock(addAmount.ExternalAccountID)
 
+	h.log.Debugf("Adding amount: %v", addAmount)
+
 	account, err := h.db.GetAccountByExternalID(addAmount.ExternalAccountID)
 	if err != nil {
 		return nil, err

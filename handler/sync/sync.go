@@ -1,6 +1,8 @@
 package sync
 
-import "sync"
+import (
+	"sync"
+)
 
 // Can be locked by unique ID
 type Kmutex struct {

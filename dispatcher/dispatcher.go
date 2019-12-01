@@ -72,8 +72,6 @@ func (d *dispatcher) handleAccountCreate(rawOperation []byte) {
 		return
 	}
 
-	d.log.Debugf("Handling: %v", createAccountData)
-
 	result, err := d.h.CreateAccount(createAccountData)
 
 	if err != nil || result == nil || result.Result != types.Ok {
@@ -89,7 +87,10 @@ func (d *dispatcher) handleAccountCreate(rawOperation []byte) {
 		}
 		result.Operation = createAccountData.Operation
 		go d.sendError(result)
+		return
 	}
+	result.Operation = createAccountData.Operation
+	go d.sendResult(result)
 }
 
 func (d *dispatcher) handleAddAmount(rawOperation []byte) {
@@ -103,8 +104,6 @@ func (d *dispatcher) handleAddAmount(rawOperation []byte) {
 		})
 		return
 	}
-
-	d.log.Debugf("Handling: %v", addAmountData)
 
 	result, err := d.h.AddAmount(addAmountData)
 	if err != nil || result == nil || result.Result != types.Ok {
@@ -120,7 +119,10 @@ func (d *dispatcher) handleAddAmount(rawOperation []byte) {
 		}
 		result.Operation = addAmountData.Operation
 		go d.sendError(result)
+		return
 	}
+	result.Operation = addAmountData.Operation
+	go d.sendResult(result)
 
 }
 
@@ -135,7 +137,6 @@ func (d *dispatcher) handleTransfer(rawOperation []byte) {
 		})
 		return
 	}
-	d.log.Debugf("Handling: %v", transferData)
 
 	result, err := d.h.TransferAmount(transferData)
 	if err != nil || result == nil || result.Result != types.Ok {
@@ -151,7 +152,10 @@ func (d *dispatcher) handleTransfer(rawOperation []byte) {
 		}
 		result.Operation = transferData.Operation
 		go d.sendError(result)
+		return
 	}
+	result.Operation = transferData.Operation
+	go d.sendResult(result)
 }
 
 func (d *dispatcher) sendResult(result *types.OperationResult) {

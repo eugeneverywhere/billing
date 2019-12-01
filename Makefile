@@ -1,5 +1,6 @@
 PAYMENT_PROCESSOR_NAME 			:= billing
 MIGRATION_SERVICE_NAME          := migrate
+FUNC_TEST_NAME          := func
 NAMESPACE	   									:= "default"
 CONFIG         								:= $(wildcard local.yml)
 PKG            								:= github.com/eugeneverywhere/billing
@@ -23,6 +24,14 @@ run: ## Run service with local config.
 	make build
 	echo "Running..."
 	cd cmd/$(PAYMENT_PROCESSOR_NAME) && ./$(PAYMENT_PROCESSOR_NAME) -config=../../local.yml
+
+ft\:build: ## Build the executable file of service.
+	echo "Building..."
+	cd cmd/$(FUNC_TEST_NAME) && go build
+ft\:run: ## Run service with local config.
+	make build
+	echo "Running..."
+	cd cmd/$(FUNC_TEST_NAME) && ./$(FUNC_TEST_NAME) -config=../../local.yml
 
 
 db\:migrate: ## Run migrations.

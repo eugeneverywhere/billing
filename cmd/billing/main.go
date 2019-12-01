@@ -37,7 +37,7 @@ func main() {
 	}
 
 	logger.Init(cfg.Log)
-	log := logger.NewLogger("synchronizer")
+	log := logger.NewLogger("billing service")
 
 	database := db.New(db.GenerateMySQLDatabaseURL(cfg.DB), cfg.DB.MaxOpenConnections)
 

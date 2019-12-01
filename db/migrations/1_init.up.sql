@@ -2,7 +2,7 @@ SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
 CREATE TABLE accounts (
   id                    BIGINT AUTO_INCREMENT   PRIMARY KEY,
 
-  external_id           VARCHAR(20)            NOT NULL,
+  external_id           VARCHAR(20)  NOT NULL UNIQUE KEY ,
   balance               FLOAT            NOT NULL,
 
   status             SMALLINT(6)          default '10' not null,
