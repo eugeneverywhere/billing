@@ -12,39 +12,39 @@ func (h *handler) handleTransfer(rawOperation []byte) {
 	if err := json.Unmarshal(rawOperation, &transferData); err != nil {
 		h.log.Errorf("Can't parse transfer operation %q: %v", string(rawOperation), err)
 		go h.sendError(&types.OperationResult{
-			Operation: &types.Operation{Code: OpTransfer},
+			Operation: transferData.Operation,
 			Result:    ErrWrongFormat,
 			Message:   fmt.Sprintf("%v", err),
 		})
 		return
 	}
 	h.log.Debugf("Handling: %v", transferData)
-	if transferData.Amount <= 0 {
-		go h.sendError(&types.OperationResult{
-			Operation: &types.Operation{Code: transferData.Code},
-			Result:    ErrNonPositive,
-			Message:   "amount must be positive",
-		})
-		return
-	}
 
-	err, result := h.transferAmount(transferData)
+	err, result := h.TransferAmount(transferData)
 	if err != nil || result == nil || result.Result != Ok {
 		h.log.Errorf("Transfer failed for %v -> %v: %v",
 			transferData.Source, transferData.Target, err)
 		if result == nil {
 			go h.sendError(&types.OperationResult{
-				Operation: &types.Operation{Code: transferData.Code},
+				Operation: transferData.Operation,
 				Result:    ErrInternal,
 				Message:   "internal error",
 			})
 			return
 		}
+		result.Operation = transferData.Operation
 		go h.sendError(result)
 	}
 }
 
-func (h *handler) transferAmount(transfer *types.TransferAmount) (error, *types.OperationResult) {
+func (h *handler) TransferAmount(transfer *types.TransferAmount) (error, *types.OperationResult) {
+	if transfer.Amount <= 0 {
+		return nil, &types.OperationResult{
+			Result:  ErrNonPositive,
+			Message: "amount must be positive",
+		}
+	}
+
 	err, result, accountSrc := h.checkAccountExists(transfer.Source)
 	if accountSrc == nil {
 		return err, result
@@ -55,14 +55,19 @@ func (h *handler) transferAmount(transfer *types.TransferAmount) (error, *types.
 		return err, result
 	}
 
+	//to avoid deadlocks
 	h.accountMutex.Lock(XORStrings(transfer.Source, transfer.Target))
 	defer h.accountMutex.Unlock(XORStrings(transfer.Source, transfer.Target))
+	//then lock each account to avoid inconsistency
+	h.accountMutex.Lock(transfer.Source)
+	defer h.accountMutex.Unlock(transfer.Source)
+	h.accountMutex.Lock(transfer.Target)
+	defer h.accountMutex.Unlock(transfer.Target)
 
 	if accountSrc.Balance < transfer.Amount {
 		return nil, &types.OperationResult{
-			Operation: &types.Operation{Code: OpTransfer},
-			Result:    ErrInsufficient,
-			Message:   fmt.Sprintf("insufficient on %v", accountSrc.ExternalID),
+			Result:  ErrInsufficient,
+			Message: fmt.Sprintf("insufficient on %v", accountSrc.ExternalID),
 		}
 	}
 
@@ -95,9 +100,8 @@ func (h *handler) transferAmount(transfer *types.TransferAmount) (error, *types.
 	}
 
 	return nil, &types.OperationResult{
-		Operation: &types.Operation{Code: OpTransfer},
-		Result:    Ok,
-		Message:   fmt.Sprintf("transferred %v from %v to %v", transfer.Amount, accountSrc.ExternalID, accountTgt.ExternalID),
+		Result:  Ok,
+		Message: fmt.Sprintf("transferred %v from %v to %v", transfer.Amount, accountSrc.ExternalID, accountTgt.ExternalID),
 	}
 
 }
@@ -110,9 +114,8 @@ func (h *handler) checkAccountExists(externalID string) (error, *types.Operation
 
 	if account == nil {
 		return nil, &types.OperationResult{
-			Operation: &types.Operation{Code: OpTransfer},
-			Result:    ErrAccountDoesNotExist,
-			Message:   fmt.Sprintf("account %v does not exist", externalID),
+			Result:  ErrAccountDoesNotExist,
+			Message: fmt.Sprintf("account %v does not exist", externalID),
 		}, nil
 	}
 	return nil, nil, account

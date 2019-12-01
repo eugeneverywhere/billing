@@ -9,7 +9,7 @@ ENV GOARCH amd64
 # service configs
 ENV SERVICE_NAME billing
 ENV GIT_SSL_NO_VERIFY 1
-ENV PKG iqoption/egromov/billing
+ENV PKG github.com/eugeneverywhere/billing
 
 RUN mkdir -p /go/src/${PKG}
 WORKDIR /go/src/${PKG}/${SERVICE_NAME}
@@ -25,7 +25,7 @@ COPY . .
 
 FROM alpine:3.7 as base_runner
 
-ENV PKG iqoption/egromov/billing
+ENV PKG github.com/eugeneverywhere/billing
 
 ENV PAYMENT_PROCESSOR_NAME   				billing
 

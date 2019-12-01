@@ -1,7 +1,9 @@
 package types
 
 type Operation struct {
-	Code int `json:"op_code"`
+	ConsumerID  int `json:"cons_id"`
+	OperationID int `json:"op_id"`
+	Code        int `json:"op_code"`
 }
 
 type OperationResult struct {

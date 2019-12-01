@@ -70,7 +70,7 @@ func (h *handler) Dispatch(rawMsgPayload []byte) {
 		go h.handleTransfer(rawMsgPayload)
 	default:
 		go h.sendError(&types.OperationResult{
-			Operation: &types.Operation{Code: operationData.Code},
+			Operation: operationData,
 			Result:    ErrUnknownOperationCode,
 			Message:   "unknown op code",
 		})

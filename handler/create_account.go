@@ -12,7 +12,7 @@ func (h *handler) handleAccountCreate(rawOperation []byte) {
 	if err := json.Unmarshal(rawOperation, &createAccountData); err != nil {
 		h.log.Errorf("Can't parse create account operation %q: %v", string(rawOperation), err)
 		go h.sendError(&types.OperationResult{
-			Operation: &types.Operation{Code: OpCreateAccount},
+			Operation: createAccountData.Operation,
 			Result:    ErrWrongFormat,
 			Message:   fmt.Sprintf("%v", err),
 		})
@@ -21,18 +21,20 @@ func (h *handler) handleAccountCreate(rawOperation []byte) {
 
 	h.log.Debugf("Handling: %v", createAccountData)
 
-	err, result := h.createAccount(createAccountData)
+	err, result := h.CreateAccount(createAccountData)
+
 	if err != nil || result == nil || result.Result != Ok {
 		h.log.Errorf("Account creation failed for id %v: %v",
 			createAccountData.ExternalAccountID, err)
 		if result == nil {
 			go h.sendError(&types.OperationResult{
-				Operation: &types.Operation{Code: createAccountData.Code},
+				Operation: createAccountData.Operation,
 				Result:    ErrInternal,
 				Message:   "internal error",
 			})
 			return
 		}
+		result.Operation = createAccountData.Operation
 		go h.sendError(result)
 	}
 }
@@ -67,20 +69,18 @@ func (h *handler) getAccountByExternalID(externalID string) (bool, error) {
 	return false, nil
 }
 
-func (h *handler) createAccount(operation *types.CreateAccount) (error, *types.OperationResult) {
+func (h *handler) CreateAccount(operation *types.CreateAccount) (error, *types.OperationResult) {
 	if ContainsSpaces(operation.ExternalAccountID) {
 		return nil, &types.OperationResult{
-			Operation: &types.Operation{Code: operation.Code},
-			Result:    ErrSpaces,
-			Message:   fmt.Sprintf("blank characters not allowed: %v", operation.ExternalAccountID),
+			Result:  ErrSpaces,
+			Message: fmt.Sprintf("blank characters not allowed: %v", operation.ExternalAccountID),
 		}
 	}
 
 	if operation.ExternalAccountID == "" {
 		return nil, &types.OperationResult{
-			Operation: &types.Operation{Code: operation.Code},
-			Result:    ErrEmptyID,
-			Message:   "empty id not allowed",
+			Result:  ErrEmptyID,
+			Message: "empty id not allowed",
 		}
 	}
 
@@ -91,9 +91,8 @@ func (h *handler) createAccount(operation *types.CreateAccount) (error, *types.O
 
 	if accExists {
 		return nil, &types.OperationResult{
-			Operation: &types.Operation{Code: operation.Code},
-			Result:    ErrAccountAlreadyExists,
-			Message:   fmt.Sprintf("account %v already exists", operation.ExternalAccountID),
+			Result:  ErrAccountAlreadyExists,
+			Message: fmt.Sprintf("account %v already exists", operation.ExternalAccountID),
 		}
 	}
 
@@ -105,9 +104,9 @@ func (h *handler) createAccount(operation *types.CreateAccount) (error, *types.O
 	if err != nil || res == nil {
 		return err, nil
 	}
+
 	return nil, &types.OperationResult{
-		Operation: &types.Operation{Code: operation.Code},
-		Result:    Ok,
-		Message:   fmt.Sprintf("Account %v created", res.ExternalID),
+		Result:  Ok,
+		Message: fmt.Sprintf("Account %v created", res.ExternalID),
 	}
 }
