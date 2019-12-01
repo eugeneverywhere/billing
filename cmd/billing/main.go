@@ -7,6 +7,7 @@ import (
 	"github.com/eugeneverywhere/billing/cache"
 	"github.com/eugeneverywhere/billing/config"
 	"github.com/eugeneverywhere/billing/db"
+	"github.com/eugeneverywhere/billing/dispatcher"
 	"github.com/eugeneverywhere/billing/handler"
 	"github.com/eugeneverywhere/billing/rabbit"
 	"os"
@@ -104,7 +105,8 @@ func startProcessing(log logger.Logger,
 		os.Exit(1)
 	}
 
-	dispatcher := handler.NewHandler(db, accountsCache, sender, errSender)
+	handler := handler.NewHandler(db, accountsCache)
+	dispatcher := dispatcher.NewDispatcher(handler, sender, errSender)
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)

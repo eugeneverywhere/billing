@@ -1,46 +1,15 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/eugeneverywhere/billing/db/models"
 	"github.com/eugeneverywhere/billing/types"
 )
 
-func (h *handler) handleTransfer(rawOperation []byte) {
-	transferData := new(types.TransferAmount)
-	if err := json.Unmarshal(rawOperation, &transferData); err != nil {
-		h.log.Errorf("Can't parse transfer operation %q: %v", string(rawOperation), err)
-		go h.sendError(&types.OperationResult{
-			Operation: transferData.Operation,
-			Result:    ErrWrongFormat,
-			Message:   fmt.Sprintf("%v", err),
-		})
-		return
-	}
-	h.log.Debugf("Handling: %v", transferData)
-
-	err, result := h.TransferAmount(transferData)
-	if err != nil || result == nil || result.Result != Ok {
-		h.log.Errorf("Transfer failed for %v -> %v: %v",
-			transferData.Source, transferData.Target, err)
-		if result == nil {
-			go h.sendError(&types.OperationResult{
-				Operation: transferData.Operation,
-				Result:    ErrInternal,
-				Message:   "internal error",
-			})
-			return
-		}
-		result.Operation = transferData.Operation
-		go h.sendError(result)
-	}
-}
-
 func (h *handler) TransferAmount(transfer *types.TransferAmount) (error, *types.OperationResult) {
 	if transfer.Amount <= 0 {
 		return nil, &types.OperationResult{
-			Result:  ErrNonPositive,
+			Result:  types.ErrNonPositive,
 			Message: "amount must be positive",
 		}
 	}
@@ -66,7 +35,7 @@ func (h *handler) TransferAmount(transfer *types.TransferAmount) (error, *types.
 
 	if accountSrc.Balance < transfer.Amount {
 		return nil, &types.OperationResult{
-			Result:  ErrInsufficient,
+			Result:  types.ErrInsufficient,
 			Message: fmt.Sprintf("insufficient on %v", accountSrc.ExternalID),
 		}
 	}
@@ -100,7 +69,7 @@ func (h *handler) TransferAmount(transfer *types.TransferAmount) (error, *types.
 	}
 
 	return nil, &types.OperationResult{
-		Result:  Ok,
+		Result:  types.Ok,
 		Message: fmt.Sprintf("transferred %v from %v to %v", transfer.Amount, accountSrc.ExternalID, accountTgt.ExternalID),
 	}
 
@@ -114,7 +83,7 @@ func (h *handler) checkAccountExists(externalID string) (error, *types.Operation
 
 	if account == nil {
 		return nil, &types.OperationResult{
-			Result:  ErrAccountDoesNotExist,
+			Result:  types.ErrAccountDoesNotExist,
 			Message: fmt.Sprintf("account %v does not exist", externalID),
 		}, nil
 	}

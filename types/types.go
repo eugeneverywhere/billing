@@ -1,5 +1,24 @@
 package types
 
+const (
+	OpCreateAccount = 1
+	OpAddAmount     = 2
+	OpTransfer      = 3
+
+	Ok = 0
+
+	ErrWrongFormat          = 101
+	ErrUnknownOperationCode = 102
+	ErrAccountAlreadyExists = 103
+	ErrAccountDoesNotExist  = 104
+	ErrInsufficient         = 105
+	ErrEmptyID              = 106
+	ErrSpaces               = 107
+	ErrNonPositive          = 108
+
+	ErrInternal = -1
+)
+
 type Operation struct {
 	ConsumerID  int `json:"cons_id"`
 	OperationID int `json:"op_id"`

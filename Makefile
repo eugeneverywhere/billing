@@ -2,7 +2,7 @@ PAYMENT_PROCESSOR_NAME 			:= billing
 MIGRATION_SERVICE_NAME          := migrate
 NAMESPACE	   									:= "default"
 CONFIG         								:= $(wildcard local.yml)
-PKG            								:= iqoption/egromov/billing
+PKG            								:= github.com/eugeneverywhere/billing
 PKG_LIST       								:= $(shell go list ${PKG}/... | grep -v /vendor/)
 
 all: setup test build
