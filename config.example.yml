@@ -1,0 +1,15 @@
+DB:
+  Host: "localhost"
+  Port: 3306
+  User: user
+  Password: user
+  Name: billing
+
+Log:
+  MinLevel: DEBUG
+
+Rabbit:
+  Addr: amqp://localhost:5672/
+  InputChannel: input_channel
+  OutputChannel: output_channel
+  ErrorChannel: error_channel
