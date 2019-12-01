@@ -9,7 +9,7 @@ into specified rabbit channels for unsuccessful and successful results.
 
 Every input message must contain these fields:
 
-```json
+```
 {
 	"cons_id": 0, // Consumer id
 	"op_id": 15,  // Operation id
@@ -17,13 +17,14 @@ Every input message must contain these fields:
 ...
 }
 ```
+
 #### Response messages
 
 Response for each message is reported in output_channel or error_channel.
 Response message contains operation header data for tracking.
 
 ##### Response example
-```json
+```
 {
 	"cons_id": 0,
 	"op_id": 5,
@@ -41,7 +42,7 @@ Common possible error res_codes:
 
 Operation code: 1
 Example:
-```json
+```
 {
 	"cons_id": 0,
 	"op_id": 0,
@@ -59,7 +60,7 @@ Possible error codes:
 #### Add amount to account
 
 Operation code: 2
-```json
+```
 {
 	"cons_id": 0,
 	"op_id": 2,
@@ -77,7 +78,7 @@ Possible error codes:
 #### Transfer amount between accounts
 
 Operation code: 3
-```json
+```
 {
 	"cons_id": 0,
 	"op_id": 15,
