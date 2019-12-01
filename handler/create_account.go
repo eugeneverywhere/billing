@@ -36,31 +36,38 @@ func (h *handler) getAccountByExternalID(externalID string) (bool, error) {
 	return false, nil
 }
 
-func (h *handler) CreateAccount(operation *types.CreateAccount) (error, *types.OperationResult) {
+func (h *handler) CreateAccount(operation *types.CreateAccount) (*types.OperationResult, error) {
 	if ContainsSpaces(operation.ExternalAccountID) {
-		return nil, &types.OperationResult{
+		return &types.OperationResult{
 			Result:  types.ErrSpaces,
 			Message: fmt.Sprintf("blank characters not allowed: %v", operation.ExternalAccountID),
-		}
+		}, nil
 	}
 
 	if operation.ExternalAccountID == "" {
-		return nil, &types.OperationResult{
+		return &types.OperationResult{
 			Result:  types.ErrEmptyID,
 			Message: "empty id not allowed",
-		}
+		}, nil
+	}
+
+	if len(operation.ExternalAccountID) > types.MaxExternalIDLength {
+		return &types.OperationResult{
+			Result:  types.ErrIDTooLong,
+			Message: fmt.Sprintf("length of id exceeded %v", types.MaxExternalIDLength),
+		}, nil
 	}
 
 	accExists, err := h.accountExists(operation.ExternalAccountID)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
 	if accExists {
-		return nil, &types.OperationResult{
+		return &types.OperationResult{
 			Result:  types.ErrAccountAlreadyExists,
 			Message: fmt.Sprintf("account %v already exists", operation.ExternalAccountID),
-		}
+		}, nil
 	}
 
 	res, err := h.db.CreateAccount(&models.Account{
@@ -69,11 +76,11 @@ func (h *handler) CreateAccount(operation *types.CreateAccount) (error, *types.O
 	})
 
 	if err != nil || res == nil {
-		return err, nil
+		return nil, err
 	}
 
-	return nil, &types.OperationResult{
+	return &types.OperationResult{
 		Result:  types.Ok,
 		Message: fmt.Sprintf("Account %v created", res.ExternalID),
-	}
+	}, nil
 }

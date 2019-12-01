@@ -9,9 +9,9 @@ import (
 )
 
 type Handler interface {
-	CreateAccount(operation *types.CreateAccount) (error, *types.OperationResult)
-	AddAmount(addAmount *types.AddAmount) (error, *types.OperationResult)
-	TransferAmount(transfer *types.TransferAmount) (error, *types.OperationResult)
+	CreateAccount(operation *types.CreateAccount) (*types.OperationResult, error)
+	AddAmount(addAmount *types.AddAmount) (*types.OperationResult, error)
+	TransferAmount(transfer *types.TransferAmount) (*types.OperationResult, error)
 }
 
 type handler struct {

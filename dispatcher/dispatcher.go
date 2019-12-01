@@ -74,7 +74,7 @@ func (d *dispatcher) handleAccountCreate(rawOperation []byte) {
 
 	d.log.Debugf("Handling: %v", createAccountData)
 
-	err, result := d.h.CreateAccount(createAccountData)
+	result, err := d.h.CreateAccount(createAccountData)
 
 	if err != nil || result == nil || result.Result != types.Ok {
 		d.log.Errorf("Account creation failed for id %v: %v",
@@ -106,7 +106,7 @@ func (d *dispatcher) handleAddAmount(rawOperation []byte) {
 
 	d.log.Debugf("Handling: %v", addAmountData)
 
-	err, result := d.h.AddAmount(addAmountData)
+	result, err := d.h.AddAmount(addAmountData)
 	if err != nil || result == nil || result.Result != types.Ok {
 		d.log.Errorf("Adding amount failed for id %v: %v",
 			addAmountData.ExternalAccountID, err)
@@ -137,7 +137,7 @@ func (d *dispatcher) handleTransfer(rawOperation []byte) {
 	}
 	d.log.Debugf("Handling: %v", transferData)
 
-	err, result := d.h.TransferAmount(transferData)
+	result, err := d.h.TransferAmount(transferData)
 	if err != nil || result == nil || result.Result != types.Ok {
 		d.log.Errorf("Transfer failed for %v -> %v: %v",
 			transferData.Source, transferData.Target, err)

@@ -1,23 +1,9 @@
 package handler
 
 import (
-	"math/rand"
 	"strings"
 	"unicode"
 )
-
-const (
-	letterBytes      = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	externalIdLength = 20
-)
-
-func GetNewAccountID() string {
-	b := make([]byte, externalIdLength)
-	for i := range b {
-		b[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
-	}
-	return string(b)
-}
 
 func ContainsSpaces(str string) bool {
 	for _, v := range str {

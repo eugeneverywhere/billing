@@ -6,22 +6,22 @@ import (
 	"github.com/eugeneverywhere/billing/types"
 )
 
-func (h *handler) TransferAmount(transfer *types.TransferAmount) (error, *types.OperationResult) {
+func (h *handler) TransferAmount(transfer *types.TransferAmount) (*types.OperationResult, error) {
 	if transfer.Amount <= 0 {
-		return nil, &types.OperationResult{
+		return &types.OperationResult{
 			Result:  types.ErrNonPositive,
 			Message: "amount must be positive",
-		}
+		}, nil
 	}
 
 	err, result, accountSrc := h.checkAccountExists(transfer.Source)
 	if accountSrc == nil {
-		return err, result
+		return result, err
 	}
 
 	err, result, accountTgt := h.checkAccountExists(transfer.Target)
 	if accountTgt == nil {
-		return err, result
+		return result, err
 	}
 
 	//to avoid deadlocks
@@ -34,10 +34,10 @@ func (h *handler) TransferAmount(transfer *types.TransferAmount) (error, *types.
 	defer h.accountMutex.Unlock(transfer.Target)
 
 	if accountSrc.Balance < transfer.Amount {
-		return nil, &types.OperationResult{
+		return &types.OperationResult{
 			Result:  types.ErrInsufficient,
 			Message: fmt.Sprintf("insufficient on %v", accountSrc.ExternalID),
-		}
+		}, nil
 	}
 
 	accountSrc.Balance -= transfer.Amount
@@ -45,7 +45,7 @@ func (h *handler) TransferAmount(transfer *types.TransferAmount) (error, *types.
 
 	tr, err := h.db.Begin()
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
 	_, err = tr.UpdateAccountBalance(accountSrc)
@@ -53,7 +53,7 @@ func (h *handler) TransferAmount(transfer *types.TransferAmount) (error, *types.
 		if err = tr.Rollback(); err != nil {
 			h.log.Errorf("Rollback failed: %v", err)
 		}
-		return err, nil
+		return nil, err
 	}
 
 	_, err = tr.UpdateAccountBalance(accountTgt)
@@ -61,17 +61,17 @@ func (h *handler) TransferAmount(transfer *types.TransferAmount) (error, *types.
 		if err = tr.Rollback(); err != nil {
 			h.log.Errorf("Rollback failed: %v", err)
 		}
-		return err, nil
+		return nil, err
 	}
 
 	if err := tr.Commit(); err != nil {
-		return err, nil
+		return nil, err
 	}
 
-	return nil, &types.OperationResult{
+	return &types.OperationResult{
 		Result:  types.Ok,
 		Message: fmt.Sprintf("transferred %v from %v to %v", transfer.Amount, accountSrc.ExternalID, accountTgt.ExternalID),
-	}
+	}, nil
 
 }
 

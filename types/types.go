@@ -1,6 +1,8 @@
 package types
 
 const (
+	MaxExternalIDLength = 20
+
 	OpCreateAccount = 1
 	OpAddAmount     = 2
 	OpTransfer      = 3
@@ -15,6 +17,7 @@ const (
 	ErrEmptyID              = 106
 	ErrSpaces               = 107
 	ErrNonPositive          = 108
+	ErrIDTooLong            = 109
 
 	ErrInternal = -1
 )
