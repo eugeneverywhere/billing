@@ -1,3 +1,5 @@
 /vendor/
 ./local.yml
 .idea
+/cmd/billing/billing
+/cmd/migrate/migrate
