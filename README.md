@@ -4,6 +4,29 @@ Service that listens on rabbit queue for commands, performs operations with acco
 into specified rabbit channels for unsuccessful and successful results.
 
 ## Available operations
+#### Create account
+
+```json
+Here goes your json object definition
+```
+
+#### Create account
+
+```json
+Here goes your json object definition
+```
+
+#### Add amount to account
+
+```json
+Here goes your json object definition
+```
+
+#### Transfer amount between accounts
+
+```json
+Here goes your json object definition
+```
 
 
 ## Work flow
@@ -13,6 +36,7 @@ into specified rabbit channels for unsuccessful and successful results.
 ## Local launch
 
 To setup local environment MySQL and RabbitMQ instances required, you may use docker-compose.yml from repo
+
 
 ### Requirements
     
